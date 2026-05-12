@@ -1,0 +1,6 @@
+FROM multica-worker-base:latest
+
+# 示例：按你实际使用的 Codex CLI 安装方式调整
+RUN npm install -g @openai/codex
+
+ENV WORKER_KIND=codex
