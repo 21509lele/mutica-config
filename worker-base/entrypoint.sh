@@ -15,7 +15,6 @@ multica login --token "$MULTICA_TOKEN"
 
 echo "[worker] installed agent CLIs:"
 command -v codex || true
-command -v claude || true
 command -v gemini || true
 command -v opencode || true
 

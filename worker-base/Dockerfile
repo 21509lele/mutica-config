@@ -1,9 +1,24 @@
 FROM ubuntu:24.04
 
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG NO_PROXY
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
+ENV HTTP_PROXY=${HTTP_PROXY}
+ENV HTTPS_PROXY=${HTTPS_PROXY}
+ENV NO_PROXY=${NO_PROXY}
+ENV http_proxy=${http_proxy}
+ENV https_proxy=${https_proxy}
+ENV no_proxy=${no_proxy}
 
-RUN apt-get update && apt-get install -y \
+RUN printf 'Acquire::Retries "8";\nAcquire::http::Timeout "60";\nAcquire::https::Timeout "60";\nAcquire::ForceIPv4 "true";\n' > /etc/apt/apt.conf.d/99-proxy-retries
+
+RUN apt-get update && apt-get install -y --fix-missing \
     bash curl ca-certificates git unzip xz-utils \
     nodejs npm python3 python3-pip \
     && rm -rf /var/lib/apt/lists/*

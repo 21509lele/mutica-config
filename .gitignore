@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+
+# Runtime data produced by local workers
+workspaces/*
+!workspaces/.gitkeep

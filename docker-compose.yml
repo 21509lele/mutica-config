@@ -1,0 +1,95 @@
+services:
+  worker-base-build:
+    build:
+      context: .
+      dockerfile: worker-base/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
+        NO_PROXY: ${NO_PROXY}
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+    image: multica-worker-base:latest
+    networks:
+      - default
+      - multica_external
+
+  worker-codex-01: &codex-worker
+    build:
+      context: .
+      dockerfile: worker-codex/Dockerfile
+      args:
+        HTTP_PROXY: ${HTTP_PROXY}
+        HTTPS_PROXY: ${HTTPS_PROXY}
+        NO_PROXY: ${NO_PROXY}
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+    restart: unless-stopped
+    environment:
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_01}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DEVICE_NAME: worker-codex-01
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      NO_PROXY: ${NO_PROXY}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
+    volumes:
+      - codex_multica_home_01:/root/.multica
+      - ./workspaces/codex-01:/workspace
+    depends_on:
+      - worker-base-build
+    networks:
+      - default
+      - multica_external
+
+  worker-codex-02:
+    <<: *codex-worker
+    environment:
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_02}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DEVICE_NAME: worker-codex-02
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      NO_PROXY: ${NO_PROXY}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
+    volumes:
+      - codex_multica_home_02:/root/.multica
+      - ./workspaces/codex-02:/workspace
+
+  worker-codex-03:
+    <<: *codex-worker
+    environment:
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_03}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      DEVICE_NAME: worker-codex-03
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      NO_PROXY: ${NO_PROXY}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
+    volumes:
+      - codex_multica_home_03:/root/.multica
+      - ./workspaces/codex-03:/workspace
+
+volumes:
+  codex_multica_home_01:
+  codex_multica_home_02:
+  codex_multica_home_03:
+
+networks:
+  multica_external:
+    external: true
+    name: multica_default
