@@ -12,6 +12,10 @@ CODEX_MODEL_PROVIDER="${CODEX_MODEL_PROVIDER:-OpenAI}"
 CODEX_MODEL="${CODEX_MODEL:-gpt-5.5}"
 CODEX_MODEL_REASONING_EFFORT="${CODEX_MODEL_REASONING_EFFORT:-xhigh}"
 CODEX_BASE_URL="${CODEX_BASE_URL:-https://api.hanbbq.top/v1}"
+HOST_SSH_DIR="${HOST_SSH_DIR:-/host-ssh}"
+GIT_USER_NAME="${GIT_USER_NAME:-}"
+GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
+GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
 
 echo "[worker] initialize codex config"
 mkdir -p "${CODEX_CONFIG_DIR}"
@@ -49,6 +53,36 @@ cat > "${CODEX_CONFIG_DIR}/auth.json" <<EOF
   "OPENAI_API_KEY": "${OPENAI_API_KEY}"
 }
 EOF
+
+if [ -d "${HOST_SSH_DIR}" ]; then
+  echo "[worker] initialize ssh config"
+  mkdir -p /root/.ssh
+  cp -f "${HOST_SSH_DIR}/known_hosts" /root/.ssh/known_hosts 2>/dev/null || true
+  cp -f "${HOST_SSH_DIR}/${GIT_SSH_KEY_FILE}" "/root/.ssh/${GIT_SSH_KEY_FILE}" 2>/dev/null || true
+  cp -f "${HOST_SSH_DIR}/${GIT_SSH_KEY_FILE}.pub" "/root/.ssh/${GIT_SSH_KEY_FILE}.pub" 2>/dev/null || true
+  chmod 700 /root/.ssh
+  chmod 600 "/root/.ssh/${GIT_SSH_KEY_FILE}" 2>/dev/null || true
+  chmod 644 /root/.ssh/known_hosts "/root/.ssh/${GIT_SSH_KEY_FILE}.pub" 2>/dev/null || true
+  cat > /root/.ssh/config <<EOF
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile /root/.ssh/${GIT_SSH_KEY_FILE}
+  IdentitiesOnly yes
+EOF
+  chmod 600 /root/.ssh/config
+fi
+
+if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
+  echo "[worker] initialize git config"
+  {
+    printf "[user]\n"
+    [ -n "${GIT_USER_NAME}" ] && printf "\tname = %s\n" "${GIT_USER_NAME}"
+    [ -n "${GIT_USER_EMAIL}" ] && printf "\temail = %s\n" "${GIT_USER_EMAIL}"
+    printf "[safe]\n\tdirectory = *\n"
+    printf "[core]\n\tsshCommand = ssh -i /root/.ssh/%s -o IdentitiesOnly=yes\n" "${GIT_SSH_KEY_FILE}"
+  } > /root/.gitconfig
+fi
 
 echo "[worker] configure multica"
 multica config set server_url "$MULTICA_SERVER_URL"
