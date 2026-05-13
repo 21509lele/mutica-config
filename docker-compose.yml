@@ -26,6 +26,7 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
+    privileged: true
     restart: unless-stopped
     environment:
       MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
@@ -41,6 +42,7 @@ services:
       no_proxy: ${no_proxy}
     volumes:
       - codex_multica_home_01:/root/.multica
+      - ./codex-configs/codex-01:/root/.codex
       - ./workspaces/codex-01:/workspace
     depends_on:
       - worker-base-build
@@ -64,6 +66,7 @@ services:
       no_proxy: ${no_proxy}
     volumes:
       - codex_multica_home_02:/root/.multica
+      - ./codex-configs/codex-02:/root/.codex
       - ./workspaces/codex-02:/workspace
 
   worker-codex-03:
@@ -82,6 +85,7 @@ services:
       no_proxy: ${no_proxy}
     volumes:
       - codex_multica_home_03:/root/.multica
+      - ./codex-configs/codex-03:/root/.codex
       - ./workspaces/codex-03:/workspace
 
 volumes:

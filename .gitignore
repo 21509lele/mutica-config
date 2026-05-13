@@ -5,3 +5,7 @@
 # Runtime data produced by local workers
 workspaces/*
 !workspaces/.gitkeep
+
+# Codex runtime configs
+codex-configs/*
+!codex-configs/.gitkeep
