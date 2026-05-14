@@ -16,6 +16,9 @@ HOST_SSH_DIR="${HOST_SSH_DIR:-/host-ssh}"
 GIT_USER_NAME="${GIT_USER_NAME:-}"
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
+GSTACK_REQUIRED="${GSTACK_REQUIRED:-false}"
+GSTACK_HOST_PATH="${GSTACK_HOST_PATH:-}"
+GSTACK_CONTAINER_PATH="${GSTACK_CONTAINER_PATH:-/opt/gstack}"
 
 echo "[worker] initialize codex config"
 mkdir -p "${CODEX_CONFIG_DIR}"
@@ -82,6 +85,19 @@ if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
     printf "[safe]\n\tdirectory = *\n"
     printf "[core]\n\tsshCommand = ssh -i /root/.ssh/%s -o IdentitiesOnly=yes\n" "${GIT_SSH_KEY_FILE}"
   } > /root/.gitconfig
+fi
+
+if [ "${GSTACK_REQUIRED}" = "true" ]; then
+  if [ ! -e "${GSTACK_CONTAINER_PATH}" ]; then
+    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' does not exist." >&2
+    if [ -n "${GSTACK_HOST_PATH}" ]; then
+      echo "[worker] expected '${GSTACK_HOST_PATH}' to be mounted at '${GSTACK_CONTAINER_PATH}'." >&2
+    else
+      echo "[worker] configure GSTACK_HOST_PATH and GSTACK_CONTAINER_PATH for this runtime." >&2
+    fi
+    exit 1
+  fi
+  echo "[worker] gstack mount detected: ${GSTACK_CONTAINER_PATH}"
 fi
 
 echo "[worker] configure multica"
