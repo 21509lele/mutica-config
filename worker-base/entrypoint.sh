@@ -16,9 +16,29 @@ HOST_SSH_DIR="${HOST_SSH_DIR:-/host-ssh}"
 GIT_USER_NAME="${GIT_USER_NAME:-}"
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
+WORKER_RUNTIME_ROLE="${WORKER_RUNTIME_ROLE:-unknown}"
 GSTACK_REQUIRED="${GSTACK_REQUIRED:-false}"
 GSTACK_HOST_PATH="${GSTACK_HOST_PATH:-}"
 GSTACK_CONTAINER_PATH="${GSTACK_CONTAINER_PATH:-/opt/gstack}"
+OMX_REQUIRED="${OMX_REQUIRED:-false}"
+OMX_HOST_PATH="${OMX_HOST_PATH:-}"
+OMX_CONTAINER_PATH="${OMX_CONTAINER_PATH:-/opt/omx}"
+
+is_effectively_empty_dir() {
+  local dir_path="$1"
+
+  if [ ! -d "${dir_path}" ]; then
+    return 0
+  fi
+
+  if [ -n "$(find "${dir_path}" -mindepth 1 -not -name ".gitkeep" -print -quit 2>/dev/null)" ]; then
+    return 1
+  fi
+
+  return 0
+}
+
+echo "[worker] runtime role: ${WORKER_RUNTIME_ROLE}"
 
 echo "[worker] initialize codex config"
 mkdir -p "${CODEX_CONFIG_DIR}"
@@ -88,16 +108,45 @@ if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
 fi
 
 if [ "${GSTACK_REQUIRED}" = "true" ]; then
-  if [ ! -e "${GSTACK_CONTAINER_PATH}" ]; then
-    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' does not exist." >&2
-    if [ -n "${GSTACK_HOST_PATH}" ]; then
-      echo "[worker] expected '${GSTACK_HOST_PATH}' to be mounted at '${GSTACK_CONTAINER_PATH}'." >&2
-    else
-      echo "[worker] configure GSTACK_HOST_PATH and GSTACK_CONTAINER_PATH for this runtime." >&2
-    fi
+  if [ -z "${GSTACK_HOST_PATH}" ]; then
+    echo "[worker] gstack config error: GSTACK_HOST_PATH is empty. Configure GSTACK_HOST_PATH for this runtime." >&2
     exit 1
   fi
+
+  if [ ! -d "${GSTACK_CONTAINER_PATH}" ]; then
+    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' does not exist." >&2
+    echo "[worker] expected '${GSTACK_HOST_PATH}' to be mounted at '${GSTACK_CONTAINER_PATH}'." >&2
+    exit 1
+  fi
+
+  if is_effectively_empty_dir "${GSTACK_CONTAINER_PATH}"; then
+    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' is empty." >&2
+    echo "[worker] ensure GSTACK_HOST_PATH ('${GSTACK_HOST_PATH}') points to non-empty gstack files." >&2
+    exit 1
+  fi
+
   echo "[worker] gstack mount detected: ${GSTACK_CONTAINER_PATH}"
+fi
+
+if [ "${OMX_REQUIRED}" = "true" ]; then
+  if [ -z "${OMX_HOST_PATH}" ]; then
+    echo "[worker] OMX config error: OMX_HOST_PATH is empty. Configure OMX_HOST_PATH for this runtime." >&2
+    exit 1
+  fi
+
+  if [ ! -d "${OMX_CONTAINER_PATH}" ]; then
+    echo "[worker] OMX mount check failed: '${OMX_CONTAINER_PATH}' does not exist." >&2
+    echo "[worker] expected '${OMX_HOST_PATH}' to be mounted at '${OMX_CONTAINER_PATH}'." >&2
+    exit 1
+  fi
+
+  if is_effectively_empty_dir "${OMX_CONTAINER_PATH}"; then
+    echo "[worker] OMX mount check failed: '${OMX_CONTAINER_PATH}' is empty." >&2
+    echo "[worker] ensure OMX_HOST_PATH ('${OMX_HOST_PATH}') points to non-empty OMX files." >&2
+    exit 1
+  fi
+
+  echo "[worker] OMX mount detected: ${OMX_CONTAINER_PATH}"
 fi
 
 echo "[worker] configure multica"
@@ -112,7 +161,7 @@ command -v codex || true
 command -v gemini || true
 command -v opencode || true
 
-echo "[worker] start daemon: $DEVICE_NAME"
+echo "[worker] start daemon: ${DEVICE_NAME} (role: ${WORKER_RUNTIME_ROLE})"
 multica daemon start --device-name "$DEVICE_NAME"
 
 echo "[worker] daemon status"
