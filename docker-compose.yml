@@ -1,17 +1,3 @@
-x-worker-common-env: &worker-common-env
-  MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
-  MULTICA_APP_URL: ${MULTICA_APP_URL}
-  OPENAI_API_KEY: ${OPENAI_API_KEY}
-  GIT_USER_NAME: ${GIT_USER_NAME}
-  GIT_USER_EMAIL: ${GIT_USER_EMAIL}
-  GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
-  HTTP_PROXY: ${HTTP_PROXY}
-  HTTPS_PROXY: ${HTTPS_PROXY}
-  NO_PROXY: ${NO_PROXY}
-  http_proxy: ${http_proxy}
-  https_proxy: ${https_proxy}
-  no_proxy: ${no_proxy}
-
 services:
   worker-base-build:
     build:
@@ -29,7 +15,7 @@ services:
       - default
       - multica_external
 
-  worker-requirement: &role-worker
+  worker-codex-01: &codex-worker
     build:
       context: .
       dockerfile: worker-codex/Dockerfile
@@ -43,65 +29,96 @@ services:
     privileged: true
     restart: unless-stopped
     environment:
-      <<: *worker-common-env
-      MULTICA_TOKEN: ${MULTICA_REQUIREMENT_TOKEN}
-      WORKER_RUNTIME_ROLE: requirement
-      DEVICE_NAME: worker-requirement-runtime
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_01}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GIT_USER_NAME: ${GIT_USER_NAME}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL}
+      GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
+      DEVICE_NAME: worker-codex-01
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      NO_PROXY: ${NO_PROXY}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
+      WORKER_RUNTIME_ROLE: coding
+      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
+      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
+      OMX_REQUIRED: ${OMX_REQUIRED:-true}
     volumes:
-      - requirement_multica_home:/root/.multica
-      - ./codex-configs/requirement:/root/.codex
+      - codex_multica_home_01:/root/.multica
+      - ./codex-configs/codex-01:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/requirement:/workspace
+      - ./workspaces/codex-01:/workspace
+      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
     depends_on:
       - worker-base-build
     networks:
       - default
       - multica_external
 
-  worker-coding:
-    <<: *role-worker
+  worker-codex-02:
+    <<: *codex-worker
     environment:
-      <<: *worker-common-env
-      MULTICA_TOKEN: ${MULTICA_CODING_TOKEN}
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_02}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GIT_USER_NAME: ${GIT_USER_NAME}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL}
+      GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
+      DEVICE_NAME: worker-codex-02
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      NO_PROXY: ${NO_PROXY}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
       WORKER_RUNTIME_ROLE: coding
-      DEVICE_NAME: worker-coding-runtime
+      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
+      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
+      OMX_REQUIRED: ${OMX_REQUIRED:-true}
     volumes:
-      - coding_multica_home:/root/.multica
-      - ./codex-configs/coding:/root/.codex
+      - codex_multica_home_02:/root/.multica
+      - ./codex-configs/codex-02:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/coding:/workspace
+      - ./workspaces/codex-02:/workspace
+      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
 
-  worker-audit:
-    <<: *role-worker
+  worker-codex-03:
+    <<: *codex-worker
     environment:
-      <<: *worker-common-env
-      MULTICA_TOKEN: ${MULTICA_AUDIT_TOKEN}
-      WORKER_RUNTIME_ROLE: audit
-      DEVICE_NAME: worker-audit-runtime
+      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+      MULTICA_APP_URL: ${MULTICA_APP_URL}
+      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_03}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GIT_USER_NAME: ${GIT_USER_NAME}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL}
+      GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
+      DEVICE_NAME: worker-codex-03
+      HTTP_PROXY: ${HTTP_PROXY}
+      HTTPS_PROXY: ${HTTPS_PROXY}
+      NO_PROXY: ${NO_PROXY}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      no_proxy: ${no_proxy}
+      WORKER_RUNTIME_ROLE: coding
+      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
+      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
+      OMX_REQUIRED: ${OMX_REQUIRED:-true}
     volumes:
-      - audit_multica_home:/root/.multica
-      - ./codex-configs/audit:/root/.codex
+      - codex_multica_home_03:/root/.multica
+      - ./codex-configs/codex-03:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/audit:/workspace
-
-  worker-issue-management:
-    <<: *role-worker
-    environment:
-      <<: *worker-common-env
-      MULTICA_TOKEN: ${MULTICA_ISSUE_MANAGEMENT_TOKEN}
-      WORKER_RUNTIME_ROLE: issue-management
-      DEVICE_NAME: worker-issue-management-runtime
-    volumes:
-      - issue_management_multica_home:/root/.multica
-      - ./codex-configs/issue-management:/root/.codex
-      - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/issue-management:/workspace
+      - ./workspaces/codex-03:/workspace
+      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
 
 volumes:
-  requirement_multica_home:
-  coding_multica_home:
-  audit_multica_home:
-  issue_management_multica_home:
+  codex_multica_home_01:
+  codex_multica_home_02:
+  codex_multica_home_03:
 
 networks:
   multica_external:
