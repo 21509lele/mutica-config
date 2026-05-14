@@ -42,11 +42,17 @@ templates/issue-roles/
 | 角色 | 可改代码 | 可创建子 Issue | 可改状态 | 可关闭 Issue | 可审核代码 |
 | --- | --- | --- | --- | --- | --- |
 | Requirement Analyst | 否 | 是（主 Issue 拆分） | 是（分析相关状态） | 否 | 否 |
-| Coding Agent | 是（仅当前子 Issue） | 否（除非明确授权） | 是（coding/ready-for-review） | 否 | 否 |
-| Reviewer Agent | 否（默认） | 否 | 是（review 相关状态） | 否（主 Issue） | 是 |
+| Coding Agent | 是（仅当前子 Issue） | 否（除非明确授权） | 是（按项目状态集推进，如 `in_progress` / `in_review`） | 否 | 否 |
+| Reviewer Agent | 否（默认） | 否 | 是（评审相关状态） | 仅低风险子 Issue 可关闭（主 Issue 不可关闭） | 是 |
 | Human Owner | 视情况 | 是 | 是 | 是 | 是（最终裁决） |
 
-## 6. 维护约定
+## 6. 状态与标签说明
+
+- 模板中的“状态”指平台 Issue 状态（如 `todo`、`in_progress`、`in_review`、`done` 等）。
+- 模板中的“标签”指项目标签（如 `ready-for-coding`）；是否使用由项目约定决定。
+- 如项目流程与示例不同，优先以当前项目实际状态/标签为准，不硬编码不存在的流程名称。
+
+## 7. 维护约定
 
 - 模板变更应保持角色边界一致，不得互相冲突。
 - 如需新增角色，必须补齐与现有模板同级的字段结构。
