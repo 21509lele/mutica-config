@@ -43,11 +43,16 @@ services:
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
       no_proxy: ${no_proxy}
+      WORKER_RUNTIME_ROLE: coding
+      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
+      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
+      OMX_REQUIRED: ${OMX_REQUIRED:-true}
     volumes:
       - codex_multica_home_01:/root/.multica
       - ./codex-configs/codex-01:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
       - ./workspaces/codex-01:/workspace
+      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
     depends_on:
       - worker-base-build
     networks:
@@ -71,11 +76,16 @@ services:
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
       no_proxy: ${no_proxy}
+      WORKER_RUNTIME_ROLE: coding
+      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
+      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
+      OMX_REQUIRED: ${OMX_REQUIRED:-true}
     volumes:
       - codex_multica_home_02:/root/.multica
       - ./codex-configs/codex-02:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
       - ./workspaces/codex-02:/workspace
+      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
 
   worker-codex-03:
     <<: *codex-worker
@@ -94,11 +104,16 @@ services:
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
       no_proxy: ${no_proxy}
+      WORKER_RUNTIME_ROLE: coding
+      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
+      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
+      OMX_REQUIRED: ${OMX_REQUIRED:-true}
     volumes:
       - codex_multica_home_03:/root/.multica
       - ./codex-configs/codex-03:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
       - ./workspaces/codex-03:/workspace
+      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
 
 volumes:
   codex_multica_home_01:

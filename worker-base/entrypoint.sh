@@ -16,6 +16,28 @@ HOST_SSH_DIR="${HOST_SSH_DIR:-/host-ssh}"
 GIT_USER_NAME="${GIT_USER_NAME:-}"
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
+OMX_HOST_PATH="${OMX_HOST_PATH:-}"
+OMX_CONTAINER_PATH="${OMX_CONTAINER_PATH:-/opt/omx}"
+OMX_REQUIRED="${OMX_REQUIRED:-false}"
+
+if [ "${OMX_REQUIRED}" = "true" ]; then
+  if [ -z "${OMX_HOST_PATH}" ]; then
+    echo "[worker] OMX config error: OMX_HOST_PATH is empty. Configure OMX_HOST_PATH in docker-compose for coding runtime." >&2
+    exit 1
+  fi
+
+  if [ ! -d "${OMX_CONTAINER_PATH}" ]; then
+    echo "[worker] OMX mount error: ${OMX_CONTAINER_PATH} is missing. Check volume mapping ${OMX_HOST_PATH}:${OMX_CONTAINER_PATH}." >&2
+    exit 1
+  fi
+
+  if [ -z "$(find "${OMX_CONTAINER_PATH}" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]; then
+    echo "[worker] OMX mount error: ${OMX_CONTAINER_PATH} is empty. Ensure OMX_HOST_PATH (${OMX_HOST_PATH}) points to OMX files." >&2
+    exit 1
+  fi
+
+  echo "[worker] OMX mounted: ${OMX_HOST_PATH} -> ${OMX_CONTAINER_PATH}"
+fi
 
 echo "[worker] initialize codex config"
 mkdir -p "${CODEX_CONFIG_DIR}"
