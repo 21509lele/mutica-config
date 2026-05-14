@@ -1,3 +1,17 @@
+x-worker-common-env: &worker-common-env
+  MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
+  MULTICA_APP_URL: ${MULTICA_APP_URL}
+  OPENAI_API_KEY: ${OPENAI_API_KEY}
+  GIT_USER_NAME: ${GIT_USER_NAME}
+  GIT_USER_EMAIL: ${GIT_USER_EMAIL}
+  GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
+  HTTP_PROXY: ${HTTP_PROXY}
+  HTTPS_PROXY: ${HTTPS_PROXY}
+  NO_PROXY: ${NO_PROXY}
+  http_proxy: ${http_proxy}
+  https_proxy: ${https_proxy}
+  no_proxy: ${no_proxy}
+
 services:
   worker-base-build:
     build:
@@ -15,7 +29,7 @@ services:
       - default
       - multica_external
 
-  worker-codex-01: &codex-worker
+  worker-requirement: &role-worker
     build:
       context: .
       dockerfile: worker-codex/Dockerfile
@@ -29,81 +43,65 @@ services:
     privileged: true
     restart: unless-stopped
     environment:
-      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
-      MULTICA_APP_URL: ${MULTICA_APP_URL}
-      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_01}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GIT_USER_NAME: ${GIT_USER_NAME}
-      GIT_USER_EMAIL: ${GIT_USER_EMAIL}
-      GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
-      DEVICE_NAME: worker-codex-01
-      HTTP_PROXY: ${HTTP_PROXY}
-      HTTPS_PROXY: ${HTTPS_PROXY}
-      NO_PROXY: ${NO_PROXY}
-      http_proxy: ${http_proxy}
-      https_proxy: ${https_proxy}
-      no_proxy: ${no_proxy}
+      <<: *worker-common-env
+      MULTICA_TOKEN: ${MULTICA_REQUIREMENT_TOKEN}
+      WORKER_RUNTIME_ROLE: requirement
+      DEVICE_NAME: worker-requirement-runtime
     volumes:
-      - codex_multica_home_01:/root/.multica
-      - ./codex-configs/codex-01:/root/.codex
+      - requirement_multica_home:/root/.multica
+      - ./codex-configs/requirement:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/codex-01:/workspace
+      - ./workspaces/requirement:/workspace
     depends_on:
       - worker-base-build
     networks:
       - default
       - multica_external
 
-  worker-codex-02:
-    <<: *codex-worker
+  worker-coding:
+    <<: *role-worker
     environment:
-      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
-      MULTICA_APP_URL: ${MULTICA_APP_URL}
-      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_02}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GIT_USER_NAME: ${GIT_USER_NAME}
-      GIT_USER_EMAIL: ${GIT_USER_EMAIL}
-      GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
-      DEVICE_NAME: worker-codex-02
-      HTTP_PROXY: ${HTTP_PROXY}
-      HTTPS_PROXY: ${HTTPS_PROXY}
-      NO_PROXY: ${NO_PROXY}
-      http_proxy: ${http_proxy}
-      https_proxy: ${https_proxy}
-      no_proxy: ${no_proxy}
+      <<: *worker-common-env
+      MULTICA_TOKEN: ${MULTICA_CODING_TOKEN}
+      WORKER_RUNTIME_ROLE: coding
+      DEVICE_NAME: worker-coding-runtime
     volumes:
-      - codex_multica_home_02:/root/.multica
-      - ./codex-configs/codex-02:/root/.codex
+      - coding_multica_home:/root/.multica
+      - ./codex-configs/coding:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/codex-02:/workspace
+      - ./workspaces/coding:/workspace
 
-  worker-codex-03:
-    <<: *codex-worker
+  worker-audit:
+    <<: *role-worker
     environment:
-      MULTICA_SERVER_URL: ${MULTICA_SERVER_URL}
-      MULTICA_APP_URL: ${MULTICA_APP_URL}
-      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_03}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GIT_USER_NAME: ${GIT_USER_NAME}
-      GIT_USER_EMAIL: ${GIT_USER_EMAIL}
-      GIT_SSH_KEY_FILE: ${GIT_SSH_KEY_FILE}
-      DEVICE_NAME: worker-codex-03
-      HTTP_PROXY: ${HTTP_PROXY}
-      HTTPS_PROXY: ${HTTPS_PROXY}
-      NO_PROXY: ${NO_PROXY}
-      http_proxy: ${http_proxy}
-      https_proxy: ${https_proxy}
-      no_proxy: ${no_proxy}
+      <<: *worker-common-env
+      MULTICA_TOKEN: ${MULTICA_AUDIT_TOKEN}
+      WORKER_RUNTIME_ROLE: audit
+      DEVICE_NAME: worker-audit-runtime
     volumes:
-      - codex_multica_home_03:/root/.multica
-      - ./codex-configs/codex-03:/root/.codex
+      - audit_multica_home:/root/.multica
+      - ./codex-configs/audit:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
-      - ./workspaces/codex-03:/workspace
+      - ./workspaces/audit:/workspace
+
+  worker-issue-management:
+    <<: *role-worker
+    environment:
+      <<: *worker-common-env
+      MULTICA_TOKEN: ${MULTICA_ISSUE_MANAGEMENT_TOKEN}
+      WORKER_RUNTIME_ROLE: issue-management
+      DEVICE_NAME: worker-issue-management-runtime
+    volumes:
+      - issue_management_multica_home:/root/.multica
+      - ./codex-configs/issue-management:/root/.codex
+      - ${USERPROFILE}/.ssh:/host-ssh:ro
+      - ./workspaces/issue-management:/workspace
 
 volumes:
-  codex_multica_home_01:
-  codex_multica_home_02:
-  codex_multica_home_03:
+  requirement_multica_home:
+  coding_multica_home:
+  audit_multica_home:
+  issue_management_multica_home:
 
 networks:
   multica_external:

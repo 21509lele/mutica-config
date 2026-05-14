@@ -16,6 +16,9 @@ HOST_SSH_DIR="${HOST_SSH_DIR:-/host-ssh}"
 GIT_USER_NAME="${GIT_USER_NAME:-}"
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
+WORKER_RUNTIME_ROLE="${WORKER_RUNTIME_ROLE:-unknown}"
+
+echo "[worker] runtime role: ${WORKER_RUNTIME_ROLE}"
 
 echo "[worker] initialize codex config"
 mkdir -p "${CODEX_CONFIG_DIR}"
@@ -96,7 +99,7 @@ command -v codex || true
 command -v gemini || true
 command -v opencode || true
 
-echo "[worker] start daemon: $DEVICE_NAME"
+echo "[worker] start daemon: ${DEVICE_NAME} (role: ${WORKER_RUNTIME_ROLE})"
 multica daemon start --device-name "$DEVICE_NAME"
 
 echo "[worker] daemon status"

@@ -5,7 +5,31 @@
 # Runtime data produced by local workers
 workspaces/*
 !workspaces/.gitkeep
+!workspaces/requirement/
+!workspaces/coding/
+!workspaces/audit/
+!workspaces/issue-management/
+workspaces/requirement/*
+!workspaces/requirement/.gitkeep
+workspaces/coding/*
+!workspaces/coding/.gitkeep
+workspaces/audit/*
+!workspaces/audit/.gitkeep
+workspaces/issue-management/*
+!workspaces/issue-management/.gitkeep
 
 # Codex runtime configs
 codex-configs/*
 !codex-configs/.gitkeep
+!codex-configs/requirement/
+!codex-configs/coding/
+!codex-configs/audit/
+!codex-configs/issue-management/
+codex-configs/requirement/*
+!codex-configs/requirement/.gitkeep
+codex-configs/coding/*
+!codex-configs/coding/.gitkeep
+codex-configs/audit/*
+!codex-configs/audit/.gitkeep
+codex-configs/issue-management/*
+!codex-configs/issue-management/.gitkeep
