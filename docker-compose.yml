@@ -44,12 +44,14 @@ services:
     restart: unless-stopped
     environment:
       <<: *worker-common-env
-      MULTICA_TOKEN: ${MULTICA_REQUIREMENT_TOKEN_01}
+      MULTICA_TOKEN: ${WORKER_REQUIREMENT_TOKEN_01}
       WORKER_RUNTIME_ROLE: requirement
       DEVICE_NAME: worker-requirement-runtime
       GSTACK_REQUIRED: "true"
       GSTACK_HOST_PATH: ${GSTACK_HOST_PATH:-./runtime-assets/gstack}
       GSTACK_CONTAINER_PATH: ${GSTACK_CONTAINER_PATH:-/opt/gstack}
+      GSTACK_INSTALL_ON_START: ${GSTACK_INSTALL_ON_START:-false}
+      GSTACK_SETUP_HOST: ${GSTACK_SETUP_HOST:-codex}
     volumes:
       - requirement_multica_home:/root/.multica
       - ./codex-configs/requirement:/root/.codex
@@ -66,18 +68,18 @@ services:
     <<: *role-worker
     environment:
       <<: *worker-common-env
-      MULTICA_TOKEN: ${MULTICA_CODEX_TOKEN_01}
+      MULTICA_TOKEN: ${WORKER_CODING_TOKEN_01}
       WORKER_RUNTIME_ROLE: coding
       DEVICE_NAME: worker-coding-runtime
-      OMX_HOST_PATH: ${OMX_HOST_PATH:-./omx}
-      OMX_CONTAINER_PATH: ${OMX_CONTAINER_PATH:-/opt/omx}
       OMX_REQUIRED: ${OMX_REQUIRED:-true}
+      OMX_SETUP_SCOPE: ${OMX_SETUP_SCOPE:-user}
+      OMX_SETUP_ARGS: ${OMX_SETUP_ARGS:---force}
     volumes:
       - coding_multica_home:/root/.multica
+      - coding_omx_home:/root/.omx
       - ./codex-configs/coding:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
       - ./workspaces/coding:/workspace
-      - ${OMX_HOST_PATH:-./omx}:${OMX_CONTAINER_PATH:-/opt/omx}:ro
 
   worker-audit:
     <<: *role-worker
@@ -89,6 +91,8 @@ services:
       GSTACK_REQUIRED: "true"
       GSTACK_HOST_PATH: ${GSTACK_HOST_PATH:-./runtime-assets/gstack}
       GSTACK_CONTAINER_PATH: ${GSTACK_CONTAINER_PATH:-/opt/gstack}
+      GSTACK_INSTALL_ON_START: ${GSTACK_INSTALL_ON_START:-false}
+      GSTACK_SETUP_HOST: ${GSTACK_SETUP_HOST:-codex}
     volumes:
       - audit_multica_home:/root/.multica
       - ./codex-configs/audit:/root/.codex
@@ -112,6 +116,7 @@ services:
 volumes:
   requirement_multica_home:
   coding_multica_home:
+  coding_omx_home:
   audit_multica_home:
   issue_management_multica_home:
 

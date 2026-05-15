@@ -33,3 +33,6 @@ codex-configs/audit/*
 !codex-configs/audit/.gitkeep
 codex-configs/issue-management/*
 !codex-configs/issue-management/.gitkeep
+
+# Runtime assets
+runtime-assets/*

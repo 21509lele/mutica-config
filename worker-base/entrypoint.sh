@@ -20,9 +20,65 @@ WORKER_RUNTIME_ROLE="${WORKER_RUNTIME_ROLE:-unknown}"
 GSTACK_REQUIRED="${GSTACK_REQUIRED:-false}"
 GSTACK_HOST_PATH="${GSTACK_HOST_PATH:-}"
 GSTACK_CONTAINER_PATH="${GSTACK_CONTAINER_PATH:-/opt/gstack}"
+GSTACK_INSTALL_ON_START="${GSTACK_INSTALL_ON_START:-false}"
+GSTACK_SETUP_HOST="${GSTACK_SETUP_HOST:-codex}"
 OMX_REQUIRED="${OMX_REQUIRED:-false}"
-OMX_HOST_PATH="${OMX_HOST_PATH:-}"
-OMX_CONTAINER_PATH="${OMX_CONTAINER_PATH:-/opt/omx}"
+OMX_SETUP_SCOPE="${OMX_SETUP_SCOPE:-user}"
+OMX_SETUP_ARGS="${OMX_SETUP_ARGS:---force}"
+
+ensure_gstack_repo() {
+  if [ -z "${GSTACK_HOST_PATH}" ]; then
+    echo "[worker] gstack config error: GSTACK_HOST_PATH is empty. Configure GSTACK_HOST_PATH for this runtime." >&2
+    exit 1
+  fi
+
+  if [ ! -d "${GSTACK_CONTAINER_PATH}" ]; then
+    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' does not exist." >&2
+    echo "[worker] expected '${GSTACK_HOST_PATH}' to be mounted at '${GSTACK_CONTAINER_PATH}'." >&2
+    exit 1
+  fi
+
+  if is_effectively_empty_dir "${GSTACK_CONTAINER_PATH}"; then
+    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' is empty." >&2
+    echo "[worker] clone the gstack repository into GSTACK_HOST_PATH ('${GSTACK_HOST_PATH}')." >&2
+    exit 1
+  fi
+
+  if [ ! -x "${GSTACK_CONTAINER_PATH}/setup" ]; then
+    echo "[worker] gstack setup script missing: '${GSTACK_CONTAINER_PATH}/setup'." >&2
+    echo "[worker] ensure GSTACK_HOST_PATH ('${GSTACK_HOST_PATH}') points to the gstack repository root." >&2
+    exit 1
+  fi
+
+  if ! command -v bun >/dev/null 2>&1; then
+    echo "[worker] gstack runtime error: bun is not installed in the image." >&2
+    exit 1
+  fi
+
+  echo "[worker] gstack repository detected: ${GSTACK_CONTAINER_PATH}"
+}
+
+install_gstack_if_enabled() {
+  if [ "${GSTACK_INSTALL_ON_START}" != "true" ]; then
+    return 0
+  fi
+
+  echo "[worker] initialize gstack setup"
+  (
+    cd "${GSTACK_CONTAINER_PATH}"
+    ./setup --host "${GSTACK_SETUP_HOST}"
+  )
+}
+
+ensure_omx_cli() {
+  if ! command -v omx >/dev/null 2>&1; then
+    echo "[worker] OMX runtime error: 'omx' is not installed in the image." >&2
+    exit 1
+  fi
+
+  echo "[worker] initialize OMX setup"
+  omx setup --scope "${OMX_SETUP_SCOPE}" ${OMX_SETUP_ARGS}
+}
 
 is_effectively_empty_dir() {
   local dir_path="$1"
@@ -108,45 +164,12 @@ if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
 fi
 
 if [ "${GSTACK_REQUIRED}" = "true" ]; then
-  if [ -z "${GSTACK_HOST_PATH}" ]; then
-    echo "[worker] gstack config error: GSTACK_HOST_PATH is empty. Configure GSTACK_HOST_PATH for this runtime." >&2
-    exit 1
-  fi
-
-  if [ ! -d "${GSTACK_CONTAINER_PATH}" ]; then
-    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' does not exist." >&2
-    echo "[worker] expected '${GSTACK_HOST_PATH}' to be mounted at '${GSTACK_CONTAINER_PATH}'." >&2
-    exit 1
-  fi
-
-  if is_effectively_empty_dir "${GSTACK_CONTAINER_PATH}"; then
-    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' is empty." >&2
-    echo "[worker] ensure GSTACK_HOST_PATH ('${GSTACK_HOST_PATH}') points to non-empty gstack files." >&2
-    exit 1
-  fi
-
-  echo "[worker] gstack mount detected: ${GSTACK_CONTAINER_PATH}"
+  ensure_gstack_repo
+  install_gstack_if_enabled
 fi
 
 if [ "${OMX_REQUIRED}" = "true" ]; then
-  if [ -z "${OMX_HOST_PATH}" ]; then
-    echo "[worker] OMX config error: OMX_HOST_PATH is empty. Configure OMX_HOST_PATH for this runtime." >&2
-    exit 1
-  fi
-
-  if [ ! -d "${OMX_CONTAINER_PATH}" ]; then
-    echo "[worker] OMX mount check failed: '${OMX_CONTAINER_PATH}' does not exist." >&2
-    echo "[worker] expected '${OMX_HOST_PATH}' to be mounted at '${OMX_CONTAINER_PATH}'." >&2
-    exit 1
-  fi
-
-  if is_effectively_empty_dir "${OMX_CONTAINER_PATH}"; then
-    echo "[worker] OMX mount check failed: '${OMX_CONTAINER_PATH}' is empty." >&2
-    echo "[worker] ensure OMX_HOST_PATH ('${OMX_HOST_PATH}') points to non-empty OMX files." >&2
-    exit 1
-  fi
-
-  echo "[worker] OMX mount detected: ${OMX_CONTAINER_PATH}"
+  ensure_omx_cli
 fi
 
 echo "[worker] configure multica"
