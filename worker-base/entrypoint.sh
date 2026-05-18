@@ -160,6 +160,7 @@ if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
     [ -n "${GIT_USER_EMAIL}" ] && printf "\temail = %s\n" "${GIT_USER_EMAIL}"
     printf "[safe]\n\tdirectory = *\n"
     printf "[core]\n\tsshCommand = ssh -i /root/.ssh/%s -o IdentitiesOnly=yes\n" "${GIT_SSH_KEY_FILE}"
+    printf "[url \"git@github.com:\"]\n\tinsteadOf = https://github.com/\n"
   } > /root/.gitconfig
 fi
 
