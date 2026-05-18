@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+/.idea/
 
 # Runtime data produced by local workers
 workspaces/*
@@ -35,4 +36,5 @@ codex-configs/issue-management/*
 !codex-configs/issue-management/.gitkeep
 
 # Runtime assets
-runtime-assets/*
+/runtime-assets/gstack/
+/runtime-assets/
