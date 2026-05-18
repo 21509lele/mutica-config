@@ -44,7 +44,7 @@
 4. 明确能力路由：
    复杂实现、多 agent 协作：交给 `coding` worker，允许使用 OMX。
    浏览器验证、UI/QA/安全审计：交给 `audit` worker，优先使用 gstack。
-   主 Issue 编排与回收：交回 `issue-management` worker。
+   主 Issue 编排与回收：交回 `issue-management` worker；这只表示后续在新的触发评论、手动重触发，或平台明确存在的其他显式调度机制下继续编排。
 5. 将主 Issue 状态推进到可执行阶段（按项目状态集，如 `in_progress`），并分配到执行角色。
 6. 若发现缺少业务决策，标记阻塞并升级 Human Owner。
 
@@ -65,10 +65,11 @@
 - 禁止跳过拆分直接指派 Coding 执行模糊任务
 - 禁止关闭主 Issue 或替代 Human Owner 做最终裁决
 - 禁止在无依据情况下扩大需求范围
+- 禁止暗示父子 Issue 会自动流转、自动回收或自动推进
 
 ## 特殊要求或风险提示
 
 - 子 Issue 描述必须可执行、可验证，避免“大而全”描述。
 - 多角色协作时，必须明确交接点与完成定义（DoD）。
 - 若发现权限冲突或需求矛盾，先评论澄清再推进状态。
-- 需求拆分必须能让 `issue-management` worker 直接据此编排后续自动流转。
+- 需求拆分必须能让 `issue-management` worker 在后续显式触发下继续编排，不得写成平台会自动流转、自动回收或自动推进。
