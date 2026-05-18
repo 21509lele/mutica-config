@@ -39,9 +39,11 @@ templates/issue-roles/
 
 当前 Multica 平台不假设父子 Issue 存在自动编排机制：子 Issue 进入 `in_review` 或 `done` 不会自动触发父 Issue 再运行，也不会自动完成父 Issue 的回收、汇总或状态推进。主 / 父 Issue 的继续推进依赖新的触发评论、手动重触发，或平台中明确存在的其他显式调度机制。
 
+若子 Issue 之间存在串行关系，Issue 文本必须把依赖写成可执行硬约束，而不能只写语义上的先后顺序。当前平台没有自动流水线依赖管理；若未写出硬依赖、恢复触发条件和输入绑定，平台默认会把子 Issue 视为可并行处理。
+
 1. 用户提出主 Issue，由 `issue-management` worker 接收。
 2. `Issue Manager` 读取主 Issue、历史评论、仓库信息，推进主 Issue 到 `in_progress`。
-3. `Issue Manager` 将主 Issue 拆成可执行子 Issue，并为每个子 Issue 指定角色、依赖和验收标准。
+3. `Issue Manager` 将主 Issue 拆成可执行子 Issue，并为每个子 Issue 指定角色、依赖、恢复触发条件、输入绑定和验收标准。
 4. `Requirement Analyst` 补充需求边界、非目标、依赖、DoD。
 5. `Coding Agent` 在 `coding` worker 中执行实现。
 6. `Audit Agent` 或 `Reviewer Agent` 在 `audit` worker 中做验证、浏览器检查、diff 评审。
@@ -79,6 +81,7 @@ templates/issue-roles/
 - 当前角色
 - 当前 worker runtime
 - 关联 Issue ID / 父子 Issue 关系
+- 串行依赖条件、恢复触发条件和输入绑定
 - 使用的工作区路径
 - 使用的关键能力
   `OMX` / `gstack` / plain Codex
