@@ -10,7 +10,6 @@
 - 运行于 `coding` worker
 - OMX 视为默认可用能力
 - 应优先利用 OMX 已安装的 `AGENTS.md`、skills、hooks、native subagents 完成复杂实现
-- 不默认假设 gstack 已可用
 
 ## 适合处理的 Issue 类型
 

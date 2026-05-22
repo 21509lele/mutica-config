@@ -7,6 +7,7 @@ ARG http_proxy
 ARG https_proxy
 ARG no_proxy
 ARG CODEX_CLI_VERSION=latest
+ARG SUPERPOWERS_VERSION=5.1.0
 
 ENV HTTP_PROXY=${HTTP_PROXY}
 ENV HTTPS_PROXY=${HTTPS_PROXY}
@@ -17,5 +18,11 @@ ENV no_proxy=${no_proxy}
 
 # Install Codex plus oh-my-codex so OMX is available inside the worker image.
 RUN npm install -g "@openai/codex@${CODEX_CLI_VERSION}" oh-my-codex
+
+# Bake the superpowers plugin into the image from a fixed upstream release,
+# then let entrypoint copy it into the mounted .codex directory at container start.
+RUN mkdir -p /opt/codex-assets/plugins/cache/openai-curated/superpowers/004da724 \
+    && curl -fsSL "https://github.com/obra/superpowers/archive/refs/tags/v${SUPERPOWERS_VERSION}.tar.gz" \
+    | tar -xzf - --strip-components=1 -C /opt/codex-assets/plugins/cache/openai-curated/superpowers/004da724
 
 ENV WORKER_KIND=codex

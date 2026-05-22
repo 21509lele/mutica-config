@@ -48,17 +48,11 @@ services:
       MULTICA_TOKEN: ${WORKER_REQUIREMENT_TOKEN_01}
       WORKER_RUNTIME_ROLE: requirement
       DEVICE_NAME: worker-requirement-runtime
-      GSTACK_REQUIRED: "true"
-      GSTACK_HOST_PATH: ${GSTACK_HOST_PATH:-./runtime-assets/gstack}
-      GSTACK_CONTAINER_PATH: ${GSTACK_CONTAINER_PATH:-/opt/gstack}
-      GSTACK_INSTALL_ON_START: ${GSTACK_INSTALL_ON_START:-false}
-      GSTACK_SETUP_HOST: ${GSTACK_SETUP_HOST:-codex}
     volumes:
       - requirement_multica_home:/root/.multica
       - ./codex-configs/requirement:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
       - ./workspaces/requirement:/workspace
-      - ${GSTACK_HOST_PATH:-./runtime-assets/gstack}:${GSTACK_CONTAINER_PATH:-/opt/gstack}:ro
     depends_on:
       - worker-base-build
     networks:
@@ -89,17 +83,11 @@ services:
       MULTICA_TOKEN: ${MULTICA_AUDIT_TOKEN_01}
       WORKER_RUNTIME_ROLE: audit
       DEVICE_NAME: worker-audit-runtime
-      GSTACK_REQUIRED: "true"
-      GSTACK_HOST_PATH: ${GSTACK_HOST_PATH:-./runtime-assets/gstack}
-      GSTACK_CONTAINER_PATH: ${GSTACK_CONTAINER_PATH:-/opt/gstack}
-      GSTACK_INSTALL_ON_START: ${GSTACK_INSTALL_ON_START:-false}
-      GSTACK_SETUP_HOST: ${GSTACK_SETUP_HOST:-codex}
     volumes:
       - audit_multica_home:/root/.multica
       - ./codex-configs/audit:/root/.codex
       - ${USERPROFILE}/.ssh:/host-ssh:ro
       - ./workspaces/audit:/workspace
-      - ${GSTACK_HOST_PATH:-./runtime-assets/gstack}:${GSTACK_CONTAINER_PATH:-/opt/gstack}:ro
 
   worker-issue-management:
     <<: *role-worker

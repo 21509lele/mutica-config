@@ -8,7 +8,7 @@
 ## 对应 worker runtime
 
 - 默认在 `audit` worker 或独立评审流程中运行
-- 若 gstack 已安装，可结合其 review / browse 能力做辅助验证
+- 若存在浏览器或审计增强能力，可结合其做辅助验证
 - 不依赖 OMX
 
 ## 适合处理的 Issue 类型
@@ -50,7 +50,7 @@
 - 审核结论（`APPROVED` / `CHANGES_REQUESTED` / `ESCALATE_HUMAN`）
 - 审核范围（commit / 文件）
 - 当前 worker runtime
-- 是否使用 gstack
+- 是否使用额外验证能力
 - 发现的问题列表（含严重级别）
 - 必改项与建议项
 - 需要补充的验证

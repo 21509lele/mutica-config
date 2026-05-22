@@ -17,58 +17,10 @@ GIT_USER_NAME="${GIT_USER_NAME:-}"
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
 WORKER_RUNTIME_ROLE="${WORKER_RUNTIME_ROLE:-unknown}"
-GSTACK_REQUIRED="${GSTACK_REQUIRED:-false}"
-GSTACK_HOST_PATH="${GSTACK_HOST_PATH:-}"
-GSTACK_CONTAINER_PATH="${GSTACK_CONTAINER_PATH:-/opt/gstack}"
-GSTACK_INSTALL_ON_START="${GSTACK_INSTALL_ON_START:-false}"
-GSTACK_SETUP_HOST="${GSTACK_SETUP_HOST:-codex}"
 OMX_REQUIRED="${OMX_REQUIRED:-false}"
 OMX_SETUP_SCOPE="${OMX_SETUP_SCOPE:-user}"
 OMX_SETUP_ARGS="${OMX_SETUP_ARGS:---force}"
-
-ensure_gstack_repo() {
-  if [ -z "${GSTACK_HOST_PATH}" ]; then
-    echo "[worker] gstack config error: GSTACK_HOST_PATH is empty. Configure GSTACK_HOST_PATH for this runtime." >&2
-    exit 1
-  fi
-
-  if [ ! -d "${GSTACK_CONTAINER_PATH}" ]; then
-    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' does not exist." >&2
-    echo "[worker] expected '${GSTACK_HOST_PATH}' to be mounted at '${GSTACK_CONTAINER_PATH}'." >&2
-    exit 1
-  fi
-
-  if is_effectively_empty_dir "${GSTACK_CONTAINER_PATH}"; then
-    echo "[worker] gstack mount check failed: '${GSTACK_CONTAINER_PATH}' is empty." >&2
-    echo "[worker] clone the gstack repository into GSTACK_HOST_PATH ('${GSTACK_HOST_PATH}')." >&2
-    exit 1
-  fi
-
-  if [ ! -x "${GSTACK_CONTAINER_PATH}/setup" ]; then
-    echo "[worker] gstack setup script missing: '${GSTACK_CONTAINER_PATH}/setup'." >&2
-    echo "[worker] ensure GSTACK_HOST_PATH ('${GSTACK_HOST_PATH}') points to the gstack repository root." >&2
-    exit 1
-  fi
-
-  if ! command -v bun >/dev/null 2>&1; then
-    echo "[worker] gstack runtime error: bun is not installed in the image." >&2
-    exit 1
-  fi
-
-  echo "[worker] gstack repository detected: ${GSTACK_CONTAINER_PATH}"
-}
-
-install_gstack_if_enabled() {
-  if [ "${GSTACK_INSTALL_ON_START}" != "true" ]; then
-    return 0
-  fi
-
-  echo "[worker] initialize gstack setup"
-  (
-    cd "${GSTACK_CONTAINER_PATH}"
-    ./setup --host "${GSTACK_SETUP_HOST}"
-  )
-}
+PRELOADED_PLUGIN_ROOT="${PRELOADED_PLUGIN_ROOT:-/opt/codex-assets/plugins/cache/openai-curated}"
 
 ensure_omx_cli() {
   if ! command -v omx >/dev/null 2>&1; then
@@ -80,18 +32,16 @@ ensure_omx_cli() {
   omx setup --scope "${OMX_SETUP_SCOPE}" ${OMX_SETUP_ARGS}
 }
 
-is_effectively_empty_dir() {
-  local dir_path="$1"
+install_preloaded_plugins() {
+  local plugin_cache_dir="${CODEX_CONFIG_DIR}/plugins/cache/openai-curated"
 
-  if [ ! -d "${dir_path}" ]; then
+  if [ ! -d "${PRELOADED_PLUGIN_ROOT}" ]; then
     return 0
   fi
 
-  if [ -n "$(find "${dir_path}" -mindepth 1 -not -name ".gitkeep" -print -quit 2>/dev/null)" ]; then
-    return 1
-  fi
-
-  return 0
+  echo "[worker] install preloaded plugins"
+  mkdir -p "${plugin_cache_dir}"
+  cp -a "${PRELOADED_PLUGIN_ROOT}/." "${plugin_cache_dir}/"
 }
 
 echo "[worker] runtime role: ${WORKER_RUNTIME_ROLE}"
@@ -133,6 +83,8 @@ cat > "${CODEX_CONFIG_DIR}/auth.json" <<EOF
 }
 EOF
 
+install_preloaded_plugins
+
 if [ -d "${HOST_SSH_DIR}" ]; then
   echo "[worker] initialize ssh config"
   mkdir -p /root/.ssh
@@ -162,11 +114,6 @@ if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
     printf "[core]\n\tsshCommand = ssh -i /root/.ssh/%s -o IdentitiesOnly=yes\n" "${GIT_SSH_KEY_FILE}"
     printf "[url \"git@github.com:\"]\n\tinsteadOf = https://github.com/\n"
   } > /root/.gitconfig
-fi
-
-if [ "${GSTACK_REQUIRED}" = "true" ]; then
-  ensure_gstack_repo
-  install_gstack_if_enabled
 fi
 
 if [ "${OMX_REQUIRED}" = "true" ]; then

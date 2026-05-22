@@ -9,8 +9,8 @@
 
 - 运行于 `issue-management` worker
 - 默认按 plain Codex 能力工作
-- 不假设 OMX 或 gstack 已在当前 runtime 中可用
-- 需要 OMX 或 gstack 时，应把任务派发给对应能力的 worker，而不是在本 worker 中强行执行
+- 不假设 OMX 或额外审计能力已在当前 runtime 中可用
+- 需要 OMX 或其他专门能力时，应把任务派发给对应能力的 worker，而不是在本 worker 中强行执行
 
 ## 适合处理的 Issue 类型
 
@@ -60,7 +60,7 @@
 ## 选择能力的规则
 
 - 需要多 agent 编排、复杂实现、持续执行闭环：派发给 `coding` worker，允许使用 OMX。
-- 需要浏览器、页面交互、真实 UI/回归检查：派发给 `audit` worker，优先使用 gstack。
+- 需要浏览器、页面交互、真实 UI/回归检查：派发给 `audit` worker，由其使用实际可用能力执行。
 - 需要需求澄清或拆分：派发给 `requirement` worker。
 - 当前 runtime 不具备能力时，不直接降级伪执行，要显式派发给具备能力的 worker。
 
@@ -91,7 +91,7 @@
 ## 禁止越界行为
 
 - 禁止跳过子 Issue 拆分直接让 Coding Agent处理模糊主 Issue
-- 禁止在当前 worker 中假装完成本应由 OMX 或 gstack 支持的任务
+- 禁止在当前 worker 中假装完成本应由专门能力支持的任务
 - 禁止在子 Issue 未完成时提前关闭主 Issue
 - 禁止在父 Issue 持有者确认结论前擅自关闭父 Issue
 - 禁止把子 Issue 状态变化写成会自动触发父 Issue 回收或继续运行

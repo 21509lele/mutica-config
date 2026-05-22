@@ -9,8 +9,7 @@ ARG no_proxy
 ARG NODE_VERSION=22.15.0
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV BUN_INSTALL=/root/.bun
-ENV PATH="/root/.bun/bin:/root/.local/bin:/usr/local/bin:${PATH}"
+ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
 ENV HTTP_PROXY=${HTTP_PROXY}
 ENV HTTPS_PROXY=${HTTPS_PROXY}
 ENV NO_PROXY=${NO_PROXY}
@@ -27,8 +26,6 @@ RUN apt-get update && apt-get install -y --fix-missing \
 
 RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
     | tar -xJf - -C /usr/local --strip-components=1
-
-RUN curl -fsSL https://bun.sh/install | bash
 
 # 安装 Multica CLI
 RUN curl -fsSL https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.sh | bash

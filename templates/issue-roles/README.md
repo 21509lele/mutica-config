@@ -28,11 +28,11 @@ templates/issue-roles/
 
 | worker runtime | 主要角色模板 | 默认职责 | 特殊能力 |
 | --- | --- | --- | --- |
-| `issue-management` | `issue-manager.md` | 主 Issue 接收、拆分、派发、回收、收尾 | 普通 Codex；不假设 OMX/gstack 已加载 |
-| `requirement` | `requirement-analyst.md` | 澄清范围、拆分子 Issue、定义验收标准 | 可选 gstack，适合需要浏览器/外部资料辅助的需求分析 |
+| `issue-management` | `issue-manager.md` | 主 Issue 接收、拆分、派发、回收、收尾 | 普通 Codex；不假设额外能力已加载 |
+| `requirement` | `requirement-analyst.md` | 澄清范围、拆分子 Issue、定义验收标准 | plain Codex，必要时补充外部资料分析 |
 | `coding` | `coding-agent.md` | 实现代码、配置、测试、文档改动 | OMX 自动加载，适合多 agent 编排与执行流 |
-| `audit` | `audit-agent.md` | 浏览器验证、回归检查、安全/体验审计 | 可选 gstack，适合 `/browse`、`/qa`、`/review` 类技能 |
-| `audit` 或独立评审流程 | `reviewer-agent.md` | 基于 diff 的技术评审 | 可结合 gstack 或普通 Codex 审查 |
+| `audit` | `audit-agent.md` | 浏览器验证、回归检查、安全/体验审计 | plain Codex，可按实际环境补充浏览器或审计能力 |
+| `audit` 或独立评审流程 | `reviewer-agent.md` | 基于 diff 的技术评审 | 普通 Codex 审查，可按实际环境补充验证 |
 | 人工 | `human-owner.md` | 升级裁决、风险确认、最终关闭 | 不受 runtime 约束 |
 
 ## 4. 主 Issue 显式编排流程
@@ -50,14 +50,14 @@ templates/issue-roles/
 7. 子 Issue 完成后，执行角色必须在当前 Issue 或父 Issue 中使用平台可触发的显式 `@` 通知下一持有者 / 父 Issue 持有者继续推进，不能只写“建议下一步由谁处理”。
 8. `Issue Manager` 在显式触发后亲自回收所有子 Issue 结果，汇总到主 Issue；若无阻塞且父 Issue 持有者确认结论后再推进主 Issue 到 `done`，否则升级 `Human Owner`。
 
-## 5. OMX 与 gstack 的使用约定
+## 5. OMX 与验证能力的使用约定
 
 - `OMX`：
   仅对 `coding` worker 视为默认可用能力。模板应鼓励在复杂实现、并行子任务、计划/执行分离时使用 OMX 的 `AGENTS.md`、skills、hooks、native subagents。
-- `gstack`：
-  仅对启用了 `GSTACK_INSTALL_ON_START=true` 且完成 setup 的 worker 视为可用。模板应将其视为“浏览器/QA/审计增强能力”，而非所有任务的默认依赖。
+- 浏览器 / 审计增强能力：
+  对 `audit` 或 `review` 路由，仅能把实际存在的浏览器、截图、审计工具视为可用能力，不能预设某个特定工具一定存在。
 - `issue-management`：
-  不假设 OMX 或 gstack 已安装完成。该角色应通过派发给具备能力的 worker 来间接使用这些能力，而不是强行在自身 runtime 中执行。
+  不假设 OMX 或额外验证能力已安装完成。该角色应通过派发给具备能力的 worker 来间接使用这些能力，而不是强行在自身 runtime 中执行。
 
 ## 6. 工作区与留痕文件
 
@@ -73,8 +73,6 @@ templates/issue-roles/
   `codex-configs/coding`
   `codex-configs/audit`
   `codex-configs/issue-management`
-- gstack 资源：
-  `runtime-assets/gstack`
 
 ## 7. 每一步必须沉淀到 Issue 评论的交接信息
 
@@ -84,7 +82,7 @@ templates/issue-roles/
 - 串行依赖条件、恢复触发条件和输入绑定
 - 使用的工作区路径
 - 使用的关键能力
-  `OMX` / `gstack` / plain Codex
+  `OMX` / plain Codex / 其他实际存在的验证能力
 - 已完成动作
 - 产出文件或修改文件
 - 验证命令与结果
