@@ -19,10 +19,20 @@ ENV no_proxy=${no_proxy}
 
 RUN printf 'Acquire::Retries "8";\nAcquire::http::Timeout "60";\nAcquire::https::Timeout "60";\nAcquire::ForceIPv4 "true";\n' > /etc/apt/apt.conf.d/99-proxy-retries
 
-RUN apt-get update && apt-get install -y --fix-missing \
-    bash curl ca-certificates git unzip xz-utils tmux \
-    python3 python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
+
+RUN for attempt in 1 2 3 4 5; do \
+      apt-get update && \
+      apt-get install -y --fix-missing \
+        bash curl ca-certificates git unzip xz-utils tmux \
+        python3 python3-pip && \
+      rm -rf /var/lib/apt/lists/* && \
+      exit 0; \
+      echo "apt install attempt ${attempt} failed, retrying..." >&2; \
+      rm -rf /var/lib/apt/lists/*; \
+      sleep $((attempt * 5)); \
+    done; \
+    exit 1
 
 RUN curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz" \
     | tar -xJf - -C /usr/local --strip-components=1
