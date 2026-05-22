@@ -40,6 +40,7 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
+        CODEX_CLI_VERSION: ${CODEX_CLI_VERSION:-latest}
     privileged: true
     restart: unless-stopped
     environment:

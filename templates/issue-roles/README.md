@@ -47,7 +47,7 @@ templates/issue-roles/
 4. `Requirement Analyst` 补充需求边界、非目标、依赖、DoD。
 5. `Coding Agent` 在 `coding` worker 中执行实现。
 6. `Audit Agent` 或 `Reviewer Agent` 在 `audit` worker 中做验证、浏览器检查、diff 评审。
-7. 子 Issue 完成后，执行角色必须在当前 Issue 或父 Issue 中使用平台可触发的显示 `@` 通知下一持有者 / 父 Issue 持有者继续推进，不能只写“建议下一步由谁处理”。
+7. 子 Issue 完成后，执行角色必须在当前 Issue 或父 Issue 中使用平台可触发的显式 `@` 通知下一持有者 / 父 Issue 持有者继续推进，不能只写“建议下一步由谁处理”。
 8. `Issue Manager` 在显式触发后亲自回收所有子 Issue 结果，汇总到主 Issue；若无阻塞且父 Issue 持有者确认结论后再推进主 Issue 到 `done`，否则升级 `Human Owner`。
 
 ## 5. OMX 与 gstack 的使用约定
@@ -89,7 +89,7 @@ templates/issue-roles/
 - 产出文件或修改文件
 - 验证命令与结果
 - 下一步交接对象
-- 已执行的显示 `@` 通知对象与通知位置
+- 已执行的显式 `@` 通知对象与通知位置
 - 阻塞项与风险
 
 ## 8. 角色选择规则
