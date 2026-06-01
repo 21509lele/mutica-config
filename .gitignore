@@ -34,3 +34,18 @@ codex-configs/audit/*
 !codex-configs/audit/.gitkeep
 codex-configs/issue-management/*
 !codex-configs/issue-management/.gitkeep
+
+# Private local runtime for gnsz-dehub-client
+.env.dehub.local
+docker-compose.dehub.local.yml
+dehub-runtime.local.md
+worker-base/entrypoint.dehub.local.sh
+worker-codex/Dockerfile.dehub.local
+workspaces/dehub-requirement/
+workspaces/dehub-coding/
+workspaces/dehub-audit/
+workspaces/dehub-issue-management/
+codex-configs/dehub-requirement/
+codex-configs/dehub-coding/
+codex-configs/dehub-audit/
+codex-configs/dehub-issue-management/

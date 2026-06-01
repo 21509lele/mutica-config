@@ -19,8 +19,6 @@ ENV no_proxy=${no_proxy}
 
 RUN printf 'Acquire::Retries "8";\nAcquire::http::Timeout "60";\nAcquire::https::Timeout "60";\nAcquire::ForceIPv4 "true";\n' > /etc/apt/apt.conf.d/99-proxy-retries
 
-RUN sed -i 's|http://archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|http://security.ubuntu.com/ubuntu|https://security.ubuntu.com/ubuntu|g' /etc/apt/sources.list.d/ubuntu.sources
-
 RUN for attempt in 1 2 3 4 5; do \
       apt-get update && \
       apt-get install -y --fix-missing \
