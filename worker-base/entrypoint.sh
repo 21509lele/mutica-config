@@ -16,6 +16,7 @@ HOST_SSH_DIR="${HOST_SSH_DIR:-/host-ssh}"
 GIT_USER_NAME="${GIT_USER_NAME:-}"
 GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 GIT_SSH_KEY_FILE="${GIT_SSH_KEY_FILE:-id_ed25519_github}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 WORKER_RUNTIME_ROLE="${WORKER_RUNTIME_ROLE:-unknown}"
 OMX_REQUIRED="${OMX_REQUIRED:-false}"
 OMX_SETUP_SCOPE="${OMX_SETUP_SCOPE:-user}"
@@ -116,6 +117,11 @@ if [ -n "${GIT_USER_NAME}" ] || [ -n "${GIT_USER_EMAIL}" ]; then
   } > /root/.gitconfig
 fi
 
+if command -v gh >/dev/null 2>&1 && [ -n "${GITHUB_TOKEN}" ]; then
+  echo "[worker] login to GitHub CLI"
+  printf '%s' "${GITHUB_TOKEN}" | gh auth login --hostname github.com --with-token
+fi
+
 if [ "${OMX_REQUIRED}" = "true" ]; then
   ensure_omx_cli
 fi
@@ -131,6 +137,7 @@ echo "[worker] installed agent CLIs:"
 command -v codex || true
 command -v gemini || true
 command -v opencode || true
+command -v gh || true
 
 echo "[worker] start daemon: ${DEVICE_NAME} (role: ${WORKER_RUNTIME_ROLE})"
 multica daemon start --device-name "$DEVICE_NAME"

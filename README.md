@@ -78,6 +78,7 @@
   - `GIT_USER_EMAIL`
   - `GIT_SSH_KEY_FILE`
   - 各个 worker 的 `MULTICA_TOKEN`
+  - 如果需要 reviewer 创建 PR：`REVIEWER_GITHUB_TOKEN`
 
 ## 首次构建
 
@@ -159,12 +160,21 @@ docker compose down
 
 宿主机的 `${USERPROFILE}/.ssh` 以只读方式挂载到容器内 `/host-ssh`，再由 [worker-base/entrypoint.sh](/C:/Users/MR/Desktop/tools/workerspace/worker-base/entrypoint.sh) 复制到 `/root/.ssh` 并生成 git 配置。
 
+### GitHub PR
+
+- 当前配置下，所有 worker 仍会拿到同一套 SSH key，因此都具备 `git push` 的基础能力。
+- 只有 `worker-audit` 会额外注入 `REVIEWER_GITHUB_TOKEN`，并同时提供 `GITHUB_TOKEN` / `GH_TOKEN` 给 `gh` CLI，因此只有 reviewer 所在 runtime 具备“直接创建 PR”的能力。
+- reviewer 的默认收口路径是“创建或更新指向 `dev` 的 PR”，不是“在 runtime 内直接 merge 后 push `dev`”。
+- 若 `multica repo checkout` 形成的 worktree 无法直接写入底层 gitdir，reviewer 仍可在自身可写工作区中使用独立可写 clone、现有 git 凭据和 `gh pr create` 完成 PR 发起。
+- 如果只希望 reviewer 创建 PR，而不希望其他 runtime 持有推分支能力，还需要进一步把其他 worker 的 SSH 挂载移除。
+
 ## 入口脚本行为
 
 [worker-base/entrypoint.sh](/C:/Users/MR/Desktop/tools/workerspace/worker-base/entrypoint.sh) 会在容器启动时完成这些事情：
 
 - 写入 Codex 配置和鉴权文件
 - 初始化 SSH 和 git 用户信息
+- 若存在 `GITHUB_TOKEN`，登录 GitHub CLI
 - 对 `worker-coding` 执行 `omx setup`
 - 配置 Multica server/app 地址
 - 使用 token 登录 Multica

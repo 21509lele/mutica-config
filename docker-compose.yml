@@ -81,6 +81,8 @@ services:
     environment:
       <<: *worker-common-env
       MULTICA_TOKEN: ${MULTICA_AUDIT_TOKEN_01}
+      GITHUB_TOKEN: ${REVIEWER_GITHUB_TOKEN:-}
+      GH_TOKEN: ${REVIEWER_GITHUB_TOKEN:-}
       WORKER_RUNTIME_ROLE: audit
       DEVICE_NAME: worker-audit-runtime
     volumes:

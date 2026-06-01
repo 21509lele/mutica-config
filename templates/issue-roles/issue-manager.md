@@ -50,9 +50,10 @@
 4. 为每个子 Issue 选择执行角色：
    `coding` 需求交给 Coding Agent。
    `code review`、`review`、`diff review`、`CR`、`审阅`、`评审` 等明确技术评审需求，优先交给 Reviewer Agent。
-   `browser/qa/security/ui` 等需要真实行为验证或审计证据的需求，优先交给 Audit Agent。
+   只有明确写出 `browser`、`qa`、`security audit`、`ui audit`、`回归验证`、`行为验证`、`冒烟检查` 等真实行为验证或审计证据需求时，才交给 Audit Agent。
    若同时存在技术评审与行为验证，必须拆成两个串行节点：先由 Reviewer Agent 做基于 diff 的审阅，再按需要交给 Audit Agent 做行为验证；不得用单个 `review` 关键词将其模糊路由到 Audit Agent。
    对已通过技术评审且需要入库的实现分支，默认由 Reviewer Agent 负责向 GitHub 提交或维护指向 `dev` 的 PR，并在 PR 记录中明确源分支名、commit 标题和对应 Issue 标号。
+   不应再把“Reviewer 直接 merge 后推送到 `dev`”当作默认闭环；直接 merge 仅能作为人工明确授权后的例外路径。
 5. 定义未来可自动化的接管规则，但明确记住：这些规则当前主要用于指导显式编排，不代表平台会自动执行。
    - 触发事件：Issue 创建、状态变化、评论创建、子 Issue 状态变化、依赖变化、任务完成/失败。
    - 启动条件：依赖满足、输入已绑定、目标 runtime 在线、且不存在重复待执行队列任务。

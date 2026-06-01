@@ -31,8 +31,8 @@ templates/issue-roles/
 | `issue-management` | `issue-manager.md` | 主 Issue 接收、拆分、派发、回收、收尾 | 普通 Codex；不假设额外能力已加载 |
 | `requirement` | `requirement-analyst.md` | 澄清范围、拆分子 Issue、定义验收标准 | plain Codex，必要时补充外部资料分析 |
 | `coding` | `coding-agent.md` | 实现代码、配置、测试、文档改动 | OMX 自动加载，适合多 agent 编排与执行流 |
-| `audit` | `audit-agent.md` | 浏览器验证、回归检查、安全/体验审计 | plain Codex，可按实际环境补充浏览器或审计能力 |
-| `audit` 或独立评审流程 | `reviewer-agent.md` | 基于 diff 的技术评审，并在通过后向 GitHub 提交/维护指向 `dev` 的 PR 与合并请求 | 普通 Codex 审查，可按实际环境补充验证 |
+| `audit` | `audit-agent.md` | 仅承接真实浏览器验证、回归检查、安全/体验审计等行为证据任务 | plain Codex，可按实际环境补充浏览器或审计能力 |
+| `audit` 或独立评审流程 | `reviewer-agent.md` | 基于 diff 的技术评审，并在通过后向 GitHub 提交/维护指向 `dev` 的 PR 与合并请求 | 普通 Codex 审查；默认走 PR 收口，不默认直接 merge |
 | 人工 | `human-owner.md` | 升级裁决、风险确认、最终关闭 | 不受 runtime 约束 |
 
 ## 4. 主 Issue 多层级显式编排流程
@@ -98,8 +98,9 @@ templates/issue-roles/
 5. `Issue Manager` 或当前执行角色根据依赖和状态，显式触发可执行的 `Coding Agent` / `Audit Agent` / `Reviewer Agent` 节点。
 6. `Coding Agent` 在 `coding` worker 中执行实现。
 7. `Audit Agent` 或 `Reviewer Agent` 在 `audit` worker 中做验证、浏览器检查、diff 评审。
-   其中明确的 `review` / `code review` / `diff review` / `审阅` / `评审` 应优先进入 `Reviewer Agent`；只有真实浏览器、QA、交互回归、安全或体验检查才进入 `Audit Agent`。
-   审核通过后的标准实现分支，默认继续由 `Reviewer Agent` 向 GitHub 提交或维护指向 `dev` 的 PR；PR 记录必须写明源分支名、commit 标题和对应 Issue 标号，保证后续 git 历史可读。
+   其中明确的 `review` / `code review` / `diff review` / `审阅` / `评审` 应优先进入 `Reviewer Agent`；只有明确要求真实浏览器、QA、交互回归、安全审计、体验审计、冒烟检查等行为证据的任务才进入 `Audit Agent`。
+   审核通过后的标准实现分支，统一由 `Reviewer Agent` 向 GitHub 提交或维护指向 `dev` 的 PR；PR 记录必须写明源分支名、commit 标题和对应 Issue 标号，保证后续 git 历史可读。
+   若 `multica repo checkout` 产生的 worktree 无法直接写入底层 gitdir，这只影响“直接 merge 到权威分支”的路径，不影响 reviewer 在可写工作区中另建可写 clone、复用现有分支并发起 PR。
 8. 每个执行节点完成后，由当前节点或 `Issue Manager` 使用显式 `@` 和评论留痕通知下一持有者或恢复父 Issue。
 9. `Issue Manager` 在收到新的触发评论或手动重触发后继续回收所有子 Issue 结果，完成上卷汇总；若无阻塞且父 Issue 持有者确认结论后再推进主 Issue 到 `done`，否则升级 `Human Owner`。
 
@@ -165,7 +166,7 @@ templates/issue-roles/
 - 主 Issue 接收与编排：`issue-manager.md`
 - 需求分析、拆分、验收标准：`requirement-analyst.md`
 - 明确子 Issue 的实现：`coding-agent.md`
-- 浏览器验证、回归、体验、安全检查：`audit-agent.md`
+- 浏览器验证、回归、体验、安全检查，且任务文本中明确要求真实行为证据：`audit-agent.md`
 - 已有提交后的技术评审，以及通过后向 GitHub 提交/维护指向 `dev` 的 PR（包含 `review` / `code review` / `diff review` / `审阅` / `评审`）：`reviewer-agent.md`
 - 争议、授权、上线和关闭裁决：`human-owner.md`
 

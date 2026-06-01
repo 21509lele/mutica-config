@@ -22,7 +22,7 @@ RUN printf 'Acquire::Retries "8";\nAcquire::http::Timeout "60";\nAcquire::https:
 RUN for attempt in 1 2 3 4 5; do \
       apt-get update && \
       apt-get install -y --fix-missing \
-        bash curl ca-certificates git unzip xz-utils tmux \
+        bash curl ca-certificates git gh unzip xz-utils tmux \
         python3 python3-pip && \
       rm -rf /var/lib/apt/lists/* && \
       exit 0; \
